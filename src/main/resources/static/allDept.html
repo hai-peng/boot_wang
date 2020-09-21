@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="layui/css/layui.css" media="all">
+    <script src="js/vue.js"></script>
+    <script src="js/axios.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        <button type="button" class="layui-btn" @click="showForm()">新增</button>
+        <table class="layui-table">
+            <colgroup>
+                <col width="150">
+                <col width="200">
+                <col>
+            </colgroup>
+            <thead>
+            <tr>
+                <th>编号</th>
+                <th>账号</th>
+                <th>密码</th>
+                <th>部门</th>
+                <th>备注</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="dept in depts">
+                <td>{{dept.deptid}}</td>
+                <td>{{dept.username}}</td>
+                <td>{{dept.passwords}}</td>
+                <td>{{dept.deptname}}</td>
+                <td>{{dept.note}}</td>
+                <td><button type="button" @click="getEmpById(emp.empId)" class="layui-btn layui-btn-xs">修改</button>
+                    <button type="button" @click="delDept(dept.deptid)" class="layui-btn layui-btn-xs">删除</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div id="abb" v-if="seen">
+            <div class="zhezhao">
+            <form class="layui-form" action="" @submit.prevent="submit">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">编号</label>
+                    <div class="layui-form-label">
+                        <input type="text" name="deptid" placeholder="请输入编号" class="layui-input" v-model="dept.deptid">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">姓名</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="empName" placeholder="姓名" class="layui-input" v-model="emp.empName">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">性别</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="sex" placeholder="请输入性别" class="layui-input" v-model="emp.sex">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">年龄</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="age" placeholder="年龄" class="layui-input" v-model="emp.age">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">电话</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="phone" placeholder="请输入电话" class="layui-input" v-model="emp.phone">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+                        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                    </div>
+                </div>
+            </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        new Vue({
+            el:"#app",
+            data:{
+                depts:[],
+                dept:{},
+                seen:false
+            },
+            mounted:function(){
+                // 生命周期的挂载结束时执行
+                this.findAllDept();
+            },
+            methods:{
+                findAllDept:function(){
+                    var _this = this;
+                    // 使用ajax 调用后台服务
+                    axios.get('/dept/findAllDept')
+                        .then(function (response) {
+                            console.log(response.data.data);
+                            _this.depts = response.data.data
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+                },
+                delDept:function(deptid){
+                    var _this = this;
+                    axios.post('/dept/delDept?deptid='+deptid)
+                        .then(function (response) {
+                            console.log(response.data.data);
+                            _this.findAllDept();
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+                },
+                getEmpById:function(empId){
+                    var _this = this;
+                    axios.post('/emp/getEmp?empId='+empId)
+                        .then(function (response) {
+                            console.log(response.data.data);
+                            _this.emp = response.data.data; // 给form表单赋值
+                            _this.seen = true; // 打开弹窗
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+                },
+                submit:function(){
+                    var _this = this;
+                    axios.post('/emp/saveEmp', _this.dept)
+                        .then(function (response) {
+                            console.log(response.data.data);
+                            _this.allEmp();
+                            _this.seen = false;
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+                },
+                showForm:function(){
+                    this.seen = true;
+                }
+            }
+        })
+    </script>
+
+    <style>
+        #abb {
+            width: 100%;
+            height: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .zhezhao {
+            width: 500px;
+            height: 600px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+        }
+
+        .x {
+            float: right;
+            cursor: pointer;
+        }
+    </style>
+</body>
+</html>

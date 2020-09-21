@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hp.boot.mapper.EmpMapper">
+    <resultMap id="empInfo" type="com.hp.boot.pojo.EmpInfo">
+
+        <id property="empid" column="empid"></id>
+
+        <result property="empname" column="empname"/>
+        <result property="sex" column="sex"/>
+        <result property="age" column="age"/>
+        <result property="phone" column="phone"/>
+
+        <association property="dept" javaType="com.hp.boot.pojo.DeptInfo">
+            <id property="deptid" column="deptid"/>
+            <result property="username" column="username"/>
+            <result property="passwords" column="passwords"/>
+            <result property="deptname" column="deptname"/>
+            <result property="note" column="note"/>
+        </association>
+    </resultMap>
+
+    <select id="findAll" resultMap="empInfo">
+        select * from emp e, dept d where e.deptid = d.deptid
+    </select>
+
+    <insert id="addEmp" parameterType="com.hp.boot.pojo.EmpInfo">
+  insert into emp (empname, sex, age, phone, deptid) values (#{empname}, #{sex}, #{age}, #{phone}, #{dept.deptid})
+    </insert>
+
+    <select id="findOneEmp" resultMap="empInfo">
+        select * from emp e, dept d where e.deptid = d.deptid and e.empid = #{empid}
+    </select>
+
+    <update id="editEmp" parameterType="com.hp.boot.pojo.EmpInfo">
+        update emp set empname = #{empname}, sex = #{sex}, age = #{age}, phone = #{phone}, deptid = #{dept.deptid} where empid = #{empid}
+    </update>
+
+   <delete id="deleteEmp" >
+
+       DELETE FROM emp WHERE empid=#{empid}
+   </delete>
+</mapper>
